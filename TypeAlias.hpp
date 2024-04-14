@@ -7,3 +7,4 @@ using Price = std::int32_t;
 using Quantity = std::uint32_t;
 using OrderId = std::string;
 enum class Side { Buy, Sell };
+enum class Symbol { v0, v1 };
