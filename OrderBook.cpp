@@ -1,23 +1,42 @@
 #include <iostream>
 #include "OrderBook.hpp"
+        // returns whether to reprint orderbook price levels up to depth
 
+        bool OrderBook::process(std::map<>, const OrderAdd &orderAdd) {
+        }
 
-bool OrderBook::processAddOrder(OrderId orderId, Side side, Quantity quantity, Price price) {
-    if (side == buy) {
-        addOrder(b_orders, buys, orderId, quantity, price);
-    } else {
-        addOrder(s_orders, sells, orderId, quantity, price);
-    }
-}
+        bool OrderBook::process(const OrderUpdate &orderUpdate) {
+            if (orderUpdate.side == Side::BUY) {
+                return addOrder(b_orders, b_levels, orderAdd.order_id, orderAdd.volume, orderAdd.price);
+            } else if (orderAdd.side == Side::BUY) {
+                return addOrder(s_orders, s_levels, orderAdd.order_id, orderAdd.volume, orderAdd.price);
+            } else {
+                // dont make any changes, return false
+                // assume valid input so we never reach this state
+                return false;
+            }
+        }
 
-bool OrderBook::processDeleteOrder(OrderId orderId, Side side) {
-    
-}
+        bool OrderBook::process(const OrderDelete &orderDelete) {
+            if (orderDelete.side == Side::BUY) {
+                return addOrder(b_orders, b_levels, orderAdd.order_id);
+            } else if (orderAdd.side == Side::BUY) {
+                return addOrder(s_orders, s_levels, orderAdd.order_id);
+            } else {
+                // dont make any changes, return false
+                // assume valid input so we never reach this state
+                return false;
+            }
+        }
 
-bool OrderBook::processUpdateOrder(OrderId orderId, Side side, Quantity quantity, Price price) {
-
-}
-
-bool OrderBook::processExecuteOrder(OrderId orderId, Side side, Quantity quantity) {
-
-}
+        bool OrderBook::process(const OrderTrade &orderTrade) {
+            if (orderTrade.side == Side::BUY) {
+                return addOrder(b_orders, b_levels, orderTrade.order_id, orderTrade.volume);
+            } else if (orderTrade.side == Side::BUY) {
+                return addOrder(s_orders, s_levels, orderTrade.order_id, orderTrade.volume);
+            } else {
+                // dont make any changes, return false
+                // assume valid input so we never reach this state
+                return false;
+            }
+        }
