@@ -1,6 +1,8 @@
 #pragma once
 
 #include "TypeAlias.hpp"
+#include "message.h"
+
 
 class Order {
     private:
