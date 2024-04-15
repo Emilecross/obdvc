@@ -3,34 +3,34 @@
 #include "TypeAlias.hpp"
 #include "message.h"
 
-
+using LevelIterator = std::map<>;
 class Order {
     private:
         OrderId orderId;
         Price price;
-        Quantity quantity;
+        Volume volume;
     
     public:
-        Order(OrderId orderId_, Price price_, Quantity quantity_)
+        Order(OrderId orderId_, Price price_, Volume volume_)
         :   orderId { orderId_ }
         ,   price { price_ }
-        ,   quantity { quantity_ }
+        ,   volume { volume_ }
         {}
         /*
         Removal of order on quantity hitting 0 done in level
         */
-        void ExecuteOrder(Quantity quantity_) {
+        void ExecuteOrder(Volume volume_) {
             // assuming valid input for quantity
-            quantity -= quantity_;
+            volume -= volume_;
         }
 
-        void UpdateOrder(Price price_, Quantity quantity_) {
+        void UpdateOrder(Price price_, Volume volume_) {
             // assuming valid inputs
-            quantity = quantity_;
+            volume = volume_;
             price = price_;
         }
 
         const Price getPrice () { return price; }
 
-        const Quantity getQuantity() { return quantity; }
+        const Volume getQuantity() { return volume; }
 };
