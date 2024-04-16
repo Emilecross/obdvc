@@ -3,7 +3,6 @@
 #include "TypeAlias.hpp"
 #include "message.h"
 
-using LevelIterator = std::map<>;
 class Order {
     private:
         OrderId orderId;
@@ -32,5 +31,5 @@ class Order {
 
         const Price getPrice () { return price; }
 
-        const Volume getQuantity() { return volume; }
+        const Volume getVolume() { return volume; }
 };

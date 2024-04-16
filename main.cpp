@@ -1,5 +1,5 @@
 #include "message.h"
-#include <OrderBook.cpp>
+#include <OrderBook.hpp>
 #include <unordered_map>
 
 int main()
@@ -15,22 +15,22 @@ int main()
 		case EventType::ADD:
 			auto order = std::any_cast<OrderAdd>(mh.msg);
 			str = order.String();
-			processOrderAction(obh, order);
+			obh.processOrderAction(order);
 			break;
 		case EventType::UPDATE:
 			auto order = std::any_cast<OrderUpdate>(mh.msg);
 			str = order.String();
-			processOrderAction(obh, order);
+			obh.processOrderAction(order);
 			break;
 		case EventType::DELETE:
 			auto order = std::any_cast<OrderDelete>(mh.msg);
 			str = order.String();
-			processOrderAction(obh, order);
+			obh.processOrderAction(order);
 			break;
 		case EventType::TRADED:
 			auto order = std::any_cast<OrderTrade>(mh.msg);
 			str = order.String();
-			processOrderAction(obh, order);
+			obh.processOrderAction(order);
 			break;
 		default:
 			str = "UNKNOWN MESSAGE";
