@@ -36,7 +36,7 @@ class OrderBook {
             orderMap.emplace(std::piecewise_construct, std::forward_as_tuple(orderId), std::forward_as_tuple(price, volume));
 
             // avoid structured binding
-            auto it = orderMap.begin();
+            auto it = levelMap.begin();
             for (uint32_t i = 0; i < depth; i++, it++) {
                 if (it == levelIterator) return true;
             }
@@ -77,7 +77,7 @@ class OrderBook {
             auto orderIt = orderMap.find(orderId);
             auto oldPrice = (*orderIt).second.getPrice();
             auto oldVolume = (*orderIt).second.getPrice();
-            (*orderIt).UpdateOrder(newPrice, newVolume);
+            (*orderIt).second.UpdateOrder(newPrice, newVolume);
 
             auto oldLevelIterator = levelMap.find(oldPrice);
             (*oldLevelIterator).second -= oldVolume;

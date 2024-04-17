@@ -3,14 +3,13 @@ CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb
 PRE_FLAGS := -MMD -MP
 
 # Project directory structure
-BIN := bin
 SRC := src
 LIB := lib
 INC := include
 MAINFILE := $(SRC)/main.cpp
 
 # Build directories and output
-TARGET := $(BIN)/main
+TARGET := main
 BUILD := build
 
 # Library search directories and flags
@@ -24,11 +23,6 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 SRCS := $(shell find $(SRC) -name *.cpp)
 OBJS := $(subst $(SRC)/,$(BUILD)/,$(addsuffix .o,$(basename $(SRCS))))
 DEPS := $(OBJS:.o=.d)
-
-# Run task
-run: build
-	@echo "🚀 Executing..."
-	./$(TARGET) $(ARGS)
 
 # Build task
 build: clean all
