@@ -75,10 +75,9 @@ class OrderBook {
             auto newVolume = orderUpdate.volume;
 
             auto orderIt = orderMap.find(orderId);
-            auto [oid, orderObj] = *orderIt;
-            auto oldPrice = orderObj.getPrice();
-            auto oldVolume = orderObj.getVolume();
-            orderObj.UpdateOrder(newPrice, newVolume);
+            auto oldPrice = (*orderIt).second.getPrice();
+            auto oldVolume = (*orderIt).second.getPrice();
+            (*orderIt).UpdateOrder(newPrice, newVolume);
 
             auto oldLevelIterator = levelMap.find(oldPrice);
             (*oldLevelIterator).second -= oldVolume;
