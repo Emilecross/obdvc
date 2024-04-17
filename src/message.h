@@ -45,9 +45,13 @@ struct OrderAdd
 	int32_t price;
 	int8_t _reserved2[4];
 
-	std::string String() //todo
+	std::string String()
 	{
-		return "{'symbol': '" + std::string(symbol, 3) + "', 'order_id': " + std::to_string(order_id) + ", 'side': '" + static_cast<char>(side) + "'}";
+		return "{'symbol': '" + std::string(symbol, 3) 
+			+ "', 'order_id': " + std::to_string(order_id) 
+			+ ", 'side': '" + static_cast<char>(side) 
+			+ "', 'volume': '" + std::to_string(volume)
+			+ "', 'price': " + std::to_string(price) + "}";
 	}
 };
 
@@ -61,9 +65,13 @@ struct OrderUpdate
 	int32_t price;
 	int8_t _reserved2[4];
 
-	std::string String() //todo
+	std::string String()
 	{
-		return "{'symbol': '" + std::string(symbol, 3) + "', 'order_id': " + std::to_string(order_id) + ", 'side': '" + static_cast<char>(side) + "'}";
+		return "{'symbol': '" + std::string(symbol, 3) 
+			+ "', 'order_id': " + std::to_string(order_id) 
+			+ ", 'side': '" + static_cast<char>(side) 
+			+ "', 'volume': '" + std::to_string(volume)
+			+ "', 'price': " + std::to_string(price) + "}";
 	}
 };
 
@@ -76,7 +84,9 @@ struct OrderDelete
 
 	std::string String()
 	{
-		return "{'symbol': '" + std::string(symbol, 3) + "', 'order_id': " + std::to_string(order_id) + ", 'side': '" + static_cast<char>(side) + "'}";
+		return "{'symbol': '" + std::string(symbol, 3) 
+			+ "', 'order_id': " + std::to_string(order_id) 
+			+ ", 'side': '" + static_cast<char>(side);
 	}
 };
 
@@ -90,7 +100,10 @@ struct OrderTrade
 
 	std::string String()
 	{
-		return "{'symbol': '" + std::string(symbol, 3) + "', 'order_id': " + std::to_string(order_id) + ", 'side': '" + static_cast<char>(side) + "', 'volume': " + std::to_string(volume) + "}";
+		return "{'symbol': '" + std::string(symbol, 3) 
+			+ "', 'order_id': " + std::to_string(order_id) 
+			+ ", 'side': '" + static_cast<char>(side) 
+			+ "', 'volume': " + std::to_string(volume) + "}";
 	}
 };
 #pragma pack(pop) // pack(push, 1)

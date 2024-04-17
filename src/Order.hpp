@@ -3,31 +3,20 @@
 #include "TypeAlias.hpp"
 #include "message.h"
 
-class Order {
-    private:
+struct Order {
         Price price;
         Volume volume;
-    
     public:
-        Order(Price price_, Volume volume_)
-        :   price { price_ }
-        ,   volume { volume_ }
-        {}
-        /*
-        Removal of order on quantity hitting 0 done in level
-        */
-        void ExecuteOrder(Volume volume_) {
+        // executes and returns new volume
+        Volume executeOrder(Volume v) {
             // assuming valid input for quantity
-            volume -= volume_;
+            volume -= v;
+            return volume;
         }
 
-        void UpdateOrder(Price price_, Volume volume_) {
+        void updateOrder(Price p, Volume v) {
             // assuming valid inputs
-            volume = volume_;
-            price = price_;
+            volume = v;
+            price = p;
         }
-
-        Price getPrice () { return price; }
-
-        Volume getVolume() { return volume; }
 };
