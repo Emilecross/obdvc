@@ -5,14 +5,12 @@
 
 class Order {
     private:
-        OrderId orderId;
         Price price;
         Volume volume;
     
     public:
-        Order(OrderId orderId_, Price price_, Volume volume_)
-        :   orderId { orderId_ }
-        ,   price { price_ }
+        Order(Price price_, Volume volume_)
+        :   price { price_ }
         ,   volume { volume_ }
         {}
         /*
@@ -29,7 +27,7 @@ class Order {
             price = price_;
         }
 
-        const Price getPrice () { return price; }
+        Price getPrice () { return price; }
 
-        const Volume getVolume() { return volume; }
+        Volume getVolume() { return volume; }
 };

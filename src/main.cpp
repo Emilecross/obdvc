@@ -1,6 +1,5 @@
 #include "message.h"
-#include <OrderBook.hpp>
-#include <unordered_map>
+#include "OrderBook.hpp"
 
 int main()
 {
@@ -12,26 +11,34 @@ int main()
 		std::string str;
 		switch(mh.header.msg_type)
 		{
-		case EventType::ADD:
+		case EventType::ADD: 
+		{
 			auto order = std::any_cast<OrderAdd>(mh.msg);
 			str = order.String();
-			obh.processOrderAction(order);
+			obh.processOrderAction(mh.header.seq_num, order);
 			break;
-		case EventType::UPDATE:
+		}
+		case EventType::UPDATE: 
+		{
 			auto order = std::any_cast<OrderUpdate>(mh.msg);
 			str = order.String();
-			obh.processOrderAction(order);
+			obh.processOrderAction(mh.header.seq_num, order);
 			break;
+		}
 		case EventType::DELETE:
+		{
 			auto order = std::any_cast<OrderDelete>(mh.msg);
 			str = order.String();
-			obh.processOrderAction(order);
+			obh.processOrderAction(mh.header.seq_num, order);
 			break;
+		}
 		case EventType::TRADED:
+		{
 			auto order = std::any_cast<OrderTrade>(mh.msg);
 			str = order.String();
-			obh.processOrderAction(order);
+			obh.processOrderAction(mh.header.seq_num, order);
 			break;
+		}
 		default:
 			str = "UNKNOWN MESSAGE";
 		}

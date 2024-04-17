@@ -45,9 +45,9 @@ struct OrderAdd
 	int32_t price;
 	int8_t _reserved2[4];
 
-	std::string String()
+	std::string String() //todo
 	{
-		// return "{'symbol': '" + std::string(symbol, 3) + "', 'order_id': " + std::to_string(order_id) + ", 'side': '" + static_cast<char>(side) + "'}";
+		return "{'symbol': '" + std::string(symbol, 3) + "', 'order_id': " + std::to_string(order_id) + ", 'side': '" + static_cast<char>(side) + "'}";
 	}
 };
 
@@ -61,9 +61,9 @@ struct OrderUpdate
 	int32_t price;
 	int8_t _reserved2[4];
 
-	std::string String()
+	std::string String() //todo
 	{
-		// return "{'symbol': '" + std::string(symbol, 3) + "', 'order_id': " + std::to_string(order_id) + ", 'side': '" + static_cast<char>(side) + "'}";
+		return "{'symbol': '" + std::string(symbol, 3) + "', 'order_id': " + std::to_string(order_id) + ", 'side': '" + static_cast<char>(side) + "'}";
 	}
 };
 

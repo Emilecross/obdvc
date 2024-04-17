@@ -2,21 +2,8 @@
 #include "message.h"
 #include <map>
 #include <unordered_map>
+#include <algorithm>
 
-class OrderBookHandler {
-    private:
-        std::unordered_map<Symbol, OrderBook> orderbooks;
-    public:
-
-    template <typename OrderAction>
-    void processOrderAction(const OrderAction &orderAction) {
-        OrderBook &ob = orderbooks[orderAction.symbol];
-        bool print = false;
-        if (orderAction.side == Side::BUY) print = ob.process(ob.b_levels, ob.b_orders, orderAction);
-        else if (orderAction.side == Side::SELL) print = ob.process(ob.s_levels, ob.s_orders, orderAction);
-        if (print) ob.printOrderBook();
-    };
-};
 
 using OrdersHashMap = std::unordered_map<OrderId, Order>;
 using BuyPriceTree = std::map<Price, Volume, std::greater<Price>>;
@@ -32,7 +19,9 @@ class OrderBook {
 
     public:
         // boolean value represents if depth needs to be reprinted
-        void printOrderBook();
+        void printOrderBook(const int seqNum) {
+            std::cout << seqNum << "\n";
+        };
 
         // add order
         template <typename UMap_, typename Map_>
@@ -42,15 +31,13 @@ class OrderBook {
             auto volume = orderAdd.volume;
 
             auto levelIterator = levelMap.find(price);
-            *levelIterator += volume;
+            (*levelIterator).second += volume;
 
-            orderMap.emplace(std::piecewise_construct, 
-                        std::forward_as_tuple(orderId), 
-                        std::forward_as_tuple(price, volume, levelIterator));
+            orderMap.emplace(std::piecewise_construct, std::forward_as_tuple(orderId), std::forward_as_tuple(price, volume));
 
             // avoid structured binding
             auto it = orderMap.begin();
-            for (int i = 0; i < depth; i++, it++) {
+            for (uint32_t i = 0; i < depth; i++, it++) {
                 if (it == levelIterator) return true;
             }
 
@@ -60,19 +47,20 @@ class OrderBook {
         // delete order
         template <typename UMap_, typename Map_>
         bool process(UMap_ &orderMap, Map_ &levelMap, const OrderDelete orderDelete) {
-            auto orderId = orderAction.order_id;
+            auto orderId = orderDelete.order_id;
             auto orderIt = orderMap.find(orderId);
-            auto orderPrice = *orderIt.getPrice();
-            auto orderVolume = *orderIt.getVolume();
+            auto [oid, orderObj] = *orderIt;
+            auto orderPrice = orderObj.getPrice();
+            auto orderVolume = orderObj.getVolume();
 
             auto levelIterator = levelMap.find(orderPrice);
-            *levelIterator -= orderVolume;
+            (*levelIterator).second -= orderVolume;
 
-            if (*levelIterator == 0) levelIterator = levelMap.erase(levelIterator);
+            if ((*levelIterator).second == 0) levelIterator = levelMap.erase(levelIterator);
             if (levelIterator == levelMap.end()) return true;
 
             auto it = levelMap.begin();
-            for (int i = 0; i < depth; i++, it++) {
+            for (uint32_t i = 0; i < depth; i++, it++) {
                 if (it == levelIterator) return true;
             }
 
@@ -87,20 +75,21 @@ class OrderBook {
             auto newVolume = orderUpdate.volume;
 
             auto orderIt = orderMap.find(orderId);
-            auto oldPrice = *orderIt.getPrice();
-            auto oldVolume = *orderIt.getVolume();
-            *orderIt.UpdateOrder(newPrice, newVolume);
+            auto [oid, orderObj] = *orderIt;
+            auto oldPrice = orderObj.getPrice();
+            auto oldVolume = orderObj.getVolume();
+            orderObj.UpdateOrder(newPrice, newVolume);
 
             auto oldLevelIterator = levelMap.find(oldPrice);
-            *oldLevelIterator -= oldVolume;
+            (*oldLevelIterator).second -= oldVolume;
             auto newLevelIterator = levelMap.find(newPrice);
-            *newLevelIterator += newVolume;
+            (*newLevelIterator).second += newVolume;
 
-            if (*oldLevelIterator.getVolume() == 0) oldLevelIterator = levelMap.erase(oldLevelIterator);
-            if (*newLevelIterator.getVolume() == 0) newLevelIterator = levelMap.erase(newLevelIterator);
+            if ((*oldLevelIterator).second == 0) oldLevelIterator = levelMap.erase(oldLevelIterator);
+            if ((*newLevelIterator).second == 0) newLevelIterator = levelMap.erase(newLevelIterator);
 
             auto it = levelMap.begin();
-            for (int i = 0; i < depth; i++, it++) {
+            for (uint32_t i = 0; i < depth; i++, it++) {
                 if (it == oldLevelIterator || it == newLevelIterator) return true;
             }
 
@@ -113,18 +102,49 @@ class OrderBook {
             auto orderId = orderTrade.order_id;
             auto orderIt = orderMap.find(orderId);
             auto tradeVolume = orderTrade.volume;
-            *orderIt.ExecuteOrder(tradeVolume);
+            (*orderIt).second.ExecuteOrder(tradeVolume);
 
-            auto levelIterator = levelMap.find(*orderIt.getPrice());
-            *levelIterator -= tradeVolume;
+            auto levelIterator = levelMap.find((*orderIt).second.getPrice());
+            (*levelIterator).second -= tradeVolume;
 
-            if (*levelIterator == 0) levelIterator = levelMap.erase(levelIterator);
+            if ((*levelIterator).second == 0) levelIterator = levelMap.erase(levelIterator);
 
             auto it = levelMap.begin();
-            for (int i = 0; i < depth; i++, it++) {
+            for (uint32_t i = 0; i < depth; i++, it++) {
                 if (it == levelIterator) return true;
             }
 
             return false;
+        };
+
+        BuyPriceTree& getBuyLevels() {
+            return b_levels;
+        }
+
+        SellPriceTree& getSellLevels() {
+            return s_levels;
+        }
+
+        OrdersHashMap& getBuyOrders() {
+            return b_orders;
+        }
+
+        OrdersHashMap& getSellOrders() {
+            return s_orders;
+        }
+};
+
+class OrderBookHandler {
+    private:
+        std::unordered_map<Symbol, OrderBook> orderbooks;
+
+    public:
+        template <typename OrderAction>
+        void processOrderAction(const int seqNum, const OrderAction &orderAction) {
+            OrderBook &ob = orderbooks[orderAction.symbol];
+            bool print = false;
+            if (orderAction.side == Side::BUY) print = ob.process(ob.getBuyOrders(), ob.getBuyLevels(), orderAction);
+            else if (orderAction.side == Side::SELL) print = ob.process(ob.getSellOrders(), ob.getSellLevels(), orderAction);
+            if (print) ob.printOrderBook(seqNum);
         };
 };
