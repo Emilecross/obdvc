@@ -1,5 +1,5 @@
 # Pre-compiler and Compiler flags
-CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb
+CXX_FLAGS := -O2 -std=c++17
 PRE_FLAGS := -MMD -MP
 
 # Project directory structure
@@ -32,7 +32,6 @@ all: $(TARGET)
 
 # Task producing target from built files
 $(TARGET): $(OBJS)
-	@echo "🚧 Building..."
 	mkdir -p $(dir $@)
 	$(CXX) $(OBJS) -o $@
 
@@ -44,7 +43,6 @@ $(BUILD)/%.o: $(SRC)/%.cpp
 # Clean task
 .PHONY: clean
 clean:
-	@echo "🧹 Clearing..."
 	rm -rf build
 
 # Include all dependencies

@@ -4,14 +4,11 @@
 #include <unordered_map>
 #include <algorithm>
 
-
 using OrdersHashMap = std::unordered_map<OrderId, Order>;
 using BuyPriceTree = std::map<Price, Volume, std::greater<Price>>;
 using SellPriceTree = std::map<Price, Volume, std::less<Price>>;
-
 class OrderBook {
     private:
-        Symbol symbol;
         BuyPriceTree b_levels;
         SellPriceTree s_levels;
         OrdersHashMap b_orders, s_orders;
@@ -30,7 +27,7 @@ class OrderBook {
         }
 
         // boolean value represents if depth needs to be reprinted
-        void printOrderBook(const int seqNum) {
+        void printOrderBook(const std::string& symbol, const int seqNum) {
             std::cout << seqNum << ", " << symbol << ", ";
             printMap(b_levels);
             std::cout << ", ";
@@ -47,7 +44,7 @@ class OrderBook {
 
             auto levelIterator = levelMap.emplace(price, 0).first;
             levelIterator->second += volume;
-            orderMap.emplace(orderId, Order{price, volume});
+            orderMap.emplace(orderId, Order{price, volume, levelIterator});
 
             auto it = levelMap.begin();
             for (uint32_t i = 0; i < depth; i++, it++) {
@@ -66,7 +63,7 @@ class OrderBook {
             auto orderIt = orderMap.find(orderId);
             auto order = orderIt->second;
 
-            auto levelIterator = levelMap.find(order.price);
+            auto levelIterator = order.getIterator();
             levelIterator->second -= order.volume;
 
             if (levelIterator->second == 0) levelIterator = levelMap.erase(levelIterator);
@@ -91,7 +88,7 @@ class OrderBook {
             auto oldVolume = order.volume;
 
             // iterator to the price level <Price, Volume>
-            auto oldLevelIterator = levelMap.find(oldPrice);
+            auto oldLevelIterator = order.getIterator();
             oldLevelIterator->second -= oldVolume;
             if (oldLevelIterator->second == 0) oldLevelIterator = levelMap.erase(oldLevelIterator);
 
@@ -108,8 +105,12 @@ class OrderBook {
             order.updateOrder(orderUpdate.price, orderUpdate.volume);
 
             // iterator to the new price level <Price, Volume>
-            auto newLevelIterator = levelMap.emplace(orderUpdate.price, 0).first;
+            auto newLevelIterator = (oldPrice == order.price ? 
+                                    oldLevelIterator :
+                                    levelMap.emplace(order.price, 0).first);
+
             newLevelIterator->second += orderUpdate.volume;
+            order.setIterator(newLevelIterator);
 
             for (uint32_t i = 0; i < depth; i++, it++) {
                 if (it == oldLevelIterator || it == newLevelIterator) return true;
@@ -127,11 +128,10 @@ class OrderBook {
             auto &order = orderIt->second;
 
             // iterator to the price level <Price, Volume>
-            auto levelIterator = levelMap.find(order.price);
+            auto levelIterator = order.getIterator();
 
             // execute order
             if (order.executeOrder(orderTrade.volume) == 0) orderMap.erase(orderIt);
-
 
             // update price level and delete if empty
             levelIterator->second -= orderTrade.volume;
@@ -145,19 +145,19 @@ class OrderBook {
             return false;
         };
 
-        BuyPriceTree &getBuyLevels() {
+        BuyPriceTree& getBuyLevels() {
             return b_levels;
         }
 
-        SellPriceTree &getSellLevels() {
+        SellPriceTree& getSellLevels() {
             return s_levels;
         }
 
-        OrdersHashMap &getBuyOrders() {
+        OrdersHashMap& getBuyOrders() {
             return b_orders;
         }
 
-        OrdersHashMap &getSellOrders() {
+        OrdersHashMap& getSellOrders() {
             return s_orders;
         }
 };
@@ -176,6 +176,6 @@ struct OrderBookHandler {
             bool print = false;
             if (orderAction.side == Side::BUY) print = ob.process(ob.getBuyOrders(), ob.getBuyLevels(), orderAction);
             else if (orderAction.side == Side::SELL) print = ob.process(ob.getSellOrders(), ob.getSellLevels(), orderAction);
-            if (print) ob.printOrderBook(seqNum);
+            if (print) ob.printOrderBook(s, seqNum);
         };
 };
