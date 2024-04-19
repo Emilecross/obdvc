@@ -1,4 +1,4 @@
-CXX_FLAGS := -O2 -std=c++17 -ggdb
+CXX_FLAGS := -O2 -std=c++17
 PRE_FLAGS := -MMD -MP
 
 SRC := src
