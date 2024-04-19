@@ -21,7 +21,11 @@ class OrderBook {
         void printMap(const Map_ &mp) {
             std::cout << "[";
             auto stop = mp.end();
-            for (auto it = mp.begin(); it != stop; it++) {
+            int i = 0;
+            for (auto it = mp.begin(); it != stop && i < depth; it++) {
+                if ((std::next(it) == stop || i==depth-1) && it != b_iterator && it != s_iterator) {
+                    throw std::runtime_error("Expected: " + std::to_string(it->first) + " Saw: " + std::to_string(b_iterator->first) + " and: " + std::to_string(s_iterator->first));
+                }
                 std::cout << "(" << it->first << ", " << it->second << ")";
                 if (std::next(it) != stop) std::cout << ", ";
             }
@@ -47,6 +51,8 @@ class OrderBook {
             auto levelIterator = levelMap.emplace(price, 0).first;
             levelIterator->second += volume;
             orderMap.emplace(orderId, Order{price, volume, levelIterator});
+
+            if (levelMap.size() == 1) itr = levelIterator;
 
             // checking if need to return
             bool rtn = false;
@@ -110,17 +116,22 @@ class OrderBook {
 
             order.updateOrder(newPrice, newVolume);
 
-            bool insertMade = (levelMap.find(newPrice) != levelMap.end());
-            bool deleteMade = (oldPrice != newPrice && oldLevelIterator->second == 0);
+            // if not found
+            bool insertMade = (levelMap.count(newPrice) == 0);
+            bool deleteMade = (oldLevelIterator->second == 0);
+
             auto newLevelIterator = oldLevelIterator;
 
             bool rtn = false;
             auto nthPrice = itr->first;
             auto sz = levelMap.size();
             if ((oldPrice <= nthPrice) || (newPrice <= nthPrice)) rtn = true;
+            std::cerr << "1\n";
             if (oldPrice == newPrice || !rtn) {
+                std::cerr << "2\n";
                 newLevelIterator = levelMap.emplace(order.price, 0).first;
             } else if (sz < depth) {
+                std::cerr << "3\n";
                 if ((newPrice > nthPrice) && insertMade) {
                     newLevelIterator = levelMap.emplace(order.price, 0).first;
                     itr++;
@@ -129,6 +140,7 @@ class OrderBook {
                     itr--;
                 }
             } else if (sz == depth) {
+                std::cerr << "4\n";
                 if ((insertMade && !deleteMade && oldPrice != nthPrice)
                 || ((insertMade || deleteMade) && oldPrice == nthPrice)) {
                     newLevelIterator = levelMap.emplace(order.price, 0).first;
@@ -138,6 +150,7 @@ class OrderBook {
                     itr++;
                 }
             } else {
+                std::cerr << "5\n";
                 if (oldPrice <= nthPrice && deleteMade && !(newPrice < nthPrice && insertMade)) {
                     newLevelIterator = levelMap.emplace(order.price, 0).first;
                     itr++;
@@ -146,11 +159,11 @@ class OrderBook {
                     itr--;
                 }
             }
-
             // iterator to the new price level <Price, Volume>
             newLevelIterator->second += orderUpdate.volume;
             order.setIterator(newLevelIterator);
             if (oldLevelIterator->second == 0) oldLevelIterator = levelMap.erase(oldLevelIterator);
+            std::cerr << "6\n";
             return rtn;
         };
 
@@ -228,6 +241,6 @@ struct OrderBookHandler {
             bool print = false;
             if (orderAction.side == Side::BUY) print = ob.process(ob.getBuyOrders(), ob.getBuyLevels(), ob.getBuyItr(), orderAction);
             else if (orderAction.side == Side::SELL) print = ob.process(ob.getSellOrders(), ob.getSellLevels(), ob.getSellItr() ,orderAction);
-            if (print) ob.printOrderBook(s, seqNum);
+            ob.printOrderBook(s, seqNum);
         };
 };

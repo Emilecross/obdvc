@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 		default:
 			str = "UNKNOWN MESSAGE";
 		}
-		std::cout << mh.header.seq_num << "/" << static_cast<char>(mh.header.msg_type) << "/" << str << "\n\n";
+		// std::cout << mh.header.seq_num << "/" << static_cast<char>(mh.header.msg_type) << "/" << str << "\n\n";
 	}
 	return 0;
 }
