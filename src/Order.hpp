@@ -3,7 +3,6 @@
 #include "TypeAlias.hpp"
 #include "message.h"
 #include <map>
-#include <unordered_map>
 #include <algorithm>
 
 using Iterator = typename std::map<Price, Volume>::iterator;

@@ -1,49 +1,33 @@
-# Pre-compiler and Compiler flags
 CXX_FLAGS := -O2 -std=c++17
 PRE_FLAGS := -MMD -MP
 
-# Project directory structure
 SRC := src
-LIB := lib
-INC := include
 MAINFILE := $(SRC)/main.cpp
 
-# Build directories and output
 TARGET := main
 BUILD := build
 
-# Library search directories and flags
-EXT_LIB :=
-
-# Include directories
 INC_DIRS := $(INC) $(shell find $(SRC) -type d) 
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-# Construct build output and dependency filenames
 SRCS := $(shell find $(SRC) -name *.cpp)
 OBJS := $(subst $(SRC)/,$(BUILD)/,$(addsuffix .o,$(basename $(SRCS))))
 DEPS := $(OBJS:.o=.d)
 
-# Build task
 build: clean all
 
-# Main task
 all: $(TARGET)
 
-# Task producing target from built files
 $(TARGET): $(OBJS)
 	mkdir -p $(dir $@)
 	$(CXX) $(OBJS) -o $@
 
-# Compile all cpp files
 $(BUILD)/%.o: $(SRC)/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CXX_FLAGS) $(PRE_FLAGS) $(INC_FLAGS) -c -o $@ $<
 
-# Clean task
 .PHONY: clean
 clean:
 	rm -rf build
 
-# Include all dependencies
 -include $(DEPS)
